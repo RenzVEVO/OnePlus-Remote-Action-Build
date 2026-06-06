@@ -18,6 +18,7 @@ on:
           - OP15_oos16
           - OP13_oos16
           - OP13r_oos16
+          - OP13r-6.1.118_oos16
           - OP13S_oos16
           - OP13T_oos16
           - OP12_oos16
@@ -37,12 +38,16 @@ on:
           - OP-ACE-3V_oos16
           - OP-ACE-3_oos16
           - OP-ACE-2-PRO_oos16
+          - OP-ACE-2V_oos16
           - OP-ACE-2_oos16
+          - OP-NORD-6_oos16
           - OP-NORD-5_oos16
           - OP-NORD-CE-5_oos16
           - OP-NORD-4_oos16
           - OP-NORD-4-CE_oos16
           - OP-NORD-CE4-LITE_oos16
+          - OP-PAD-4_oos16
+          - OP-PAD-3-PRO_oos16
           - OP-PAD-3-SM8750_oos16
           - OP-PAD-3-MT6897_oos16
           - OP-PAD-2-PRO_oos16
@@ -50,6 +55,7 @@ on:
           - OP-PAD-2-SM8650_oos16
           - OP-PAD-PRO_oos16
           - OP-PAD-MT6983_oos16
+          - OP-PAD-LITE_oos16
           - OP-OPEN_oos16
           - OP-PAD-GO-2_oos16
           # OOS15
@@ -83,6 +89,7 @@ on:
           - OP-NORD-4-CE_oos15
           - OP-NORD-CE4-LITE_oos15
           - OP-NORD-3_oos15
+          - OP-NORD-N30-SE_oos15
           - OP-PAD-3-SM8750_oos15
           - OP-PAD-3-MT6897_oos15
           - OP-PAD-2-PRO_oos15
@@ -98,9 +105,13 @@ on:
           - OP10pro_oos14
           - OP10r_oos14
           - OP-ACE-3-PRO_oos14
+          - OP-ACE-2V_oos14
           - OP-ACE-RACE_oos14
           - OP-ACE_oos14
+          - OP-NORD-3_oos14
           - OP-PAD-PRO_oos14
+          - OP-PAD-MT6983_oos14
+          - OP-PAD-GO_oos14
         default: OP11_oos16
       ksu_options:
         description: 'Enter KernelSU build json'
