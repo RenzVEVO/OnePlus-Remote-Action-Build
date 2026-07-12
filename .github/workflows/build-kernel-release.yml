@@ -55,6 +55,7 @@ on:
           - OP-NORD-4-6.1.118_a16
           - OP-NORD-4-CE_a16
           - OP-NORD-CE4-LITE_a16
+          - OP-NORD-CE4-LITE-6.1.118_a16
           - OP-PAD-4_a16
           - OP-PAD-3-PRO_a16
           - OP-PAD-3-SM8750_a16
@@ -611,6 +612,7 @@ jobs:
               "CCACHE_INODE_CACHE=true"
               "CCACHE_IS_KERNEL_COMPILING=true"
               "CCACHE_UMASK=002"
+              "CCACHE_LOGFILE=${CCACHE_LOG}"
               "CCACHE_SLOPPINESS=file_macro,time_macros,include_file_mtime,include_file_ctime,pch_defines,system_headers,locale"
             )
             
@@ -618,11 +620,6 @@ jobs:
               export "$setting"
               echo "$setting" >> "$GITHUB_ENV"
             done
-            
-            if [ "${{ inputs.debug }}" == "true" ]; then
-              export "CCACHE_LOGFILE=$CCACHE_LOG"
-              echo "CCACHE_LOGFILE=$CCACHE_LOG" >> "$GITHUB_ENV"
-            fi
             
             if ccache --help 2>&1 | grep -q 'depend_mode'; then
               export CCACHE_DEPEND=true
