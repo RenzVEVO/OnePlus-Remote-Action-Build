@@ -684,6 +684,8 @@ jobs:
       - name: 🔨 Build Kernel
         id: build
         uses: WildKernels/OnePlus_KernelSU_SUSFS/.github/actions/build-kernel@main
+        env:
+          OP_BLACKLIST_MODULES: ''
         with:
           op_config_json: ${{ steps.prepare_config.outputs.config_json }}
           ksu_type: ${{ matrix.ksu_type }}
