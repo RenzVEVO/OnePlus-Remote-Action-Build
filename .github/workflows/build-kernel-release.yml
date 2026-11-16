@@ -17,29 +17,43 @@ on:
           - OP15r_a16
           - OP15_a16
           - OP13_a16
+          - OP13-6.6.89_a16
           - OP13r_a16
           - OP13r-6.1.118_a16
+          - OP13r-6.1.141_a16
           - OP13S_a16
+          - OP13S-6.6.89_a16
           - OP13T_a16
+          - OP13T-6.6.89_a16
           - OP12_a16
           - OP12-6.1.118_a16
           - OP12r_a16
           - OP12r-5.15.167_a16
+          - OP12r-5.15.180_a16
           - OP11_a16
           - OP11-5.15.167_a16
+          - OP11-5.15.180_a16
           - OP11r_a16
           - OP10pro_a16
+          - OP-TURBO-6X_a16
+          - OP-TURBO-6X-6.1.134_a16
           - OP-TURBO-6V_a16
+          - OP-TURBO-6V-6.1.118_a16
           - OP-TURBO-6_a16
           - OP-ACE-6T_a16
           - OP-ACE-6_a16
+          - OP-ACE-6-6.6.89_a16
           - OP-ACE-6-ULTRA_a16
           - OP-ACE-5-PRO_a16
+          - OP-ACE-5-PRO-6.6.89_a16
           - OP-ACE-5_a16
           - OP-ACE-5-6.1.118_a16
           - OP-ACE-5-ULTRA_a16
+          - OP-ACE-5-ULTRA-6.6.89_a16
           - OP-ACE-5-RACE_a16
+          - OP-ACE-5-RACE-6.1.134_a16
           - OP-ACE-3-PRO_a16
+          - OP-ACE-3-PRO-6.1.118_a16
           - OP-ACE-3V_a16
           - OP-ACE-3V-6.1.118_a16
           - OP-ACE-3_a16
@@ -47,22 +61,34 @@ on:
           - OP-ACE-2-PRO_a16
           - OP-ACE-2V_a16
           - OP-ACE-2_a16
+          - OP-N6_a16
+          - OP-N6-5.15.180_a16
+          - OP-N6X_a16
+          - OP-NORD-CE6_a16
+          - OP-NORD-CE6-LITE_a16
           - OP-NORD-6_a16
           - OP-NORD-5_a16
           - OP-NORD-5-6.1.118_a16
+          - OP-NORD-5-6.1.141_a16
           - OP-NORD-CE-5_a16
+          - OP-NORD-CE-5-6.1.134_a16
           - OP-NORD-4_a16
           - OP-NORD-4-6.1.118_a16
+          - OP-NORD-4-6.1.141_a16
           - OP-NORD-4-CE_a16
           - OP-NORD-CE4-LITE_a16
           - OP-NORD-CE4-LITE-6.1.118_a16
+          - OP-NORD-3_a16
           - OP-PAD-4_a16
           - OP-PAD-3-PRO_a16
           - OP-PAD-3-SM8750_a16
+          - OP-PAD-3-SM8750-6.6.89_a16
           - OP-PAD-3-MT6897_a16
           - OP-PAD-2-PRO_a16
+          - OP-PAD-2-PRO-6.6.89_a16
           - OP-PAD-2-MT6991_a16
           - OP-PAD-2-SM8650_a16
+          - OP-PAD-2-SM8650-6.1.118_a16
           - OP-PAD-PRO_a16
           - OP-PAD-MT6983_a16
           - OP-PAD-LITE_a16
@@ -116,6 +142,7 @@ on:
           - OP-ACE-RACE-5.10.226_a15
           - OP-ACE-RACE-5.10.209_a15
           - OP-ACE_a15
+          - OP-ACE-5.10.226_a15
           - OP-ACE-5.10.209_a15
           - OP-NORD-5_a15
           - OP-NORD-CE-5_a15
@@ -169,6 +196,11 @@ on:
         type: choice
         options: [O2, O3]
         default: O2
+      mlgo:
+        description: 'Do you want to enable mlgo? [Machine Learning Guided Optimization]'
+        required: false
+        type: boolean
+        default: true
       clean_build:
         description: 'Clean build (no ccache)'
         type: boolean
@@ -194,7 +226,7 @@ on:
 
 jobs:
   set-op-model:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       device_count: ${{ steps.set-matrix.outputs.count }}
@@ -263,8 +295,13 @@ jobs:
           fi
           
           echo "$filtered" | jq '.' > matrix.json
-          
-          merged_matrix=$(jq -n --argjson devices "$filtered" --argjson ksu_list "$ksu_options_normalized" '[ $devices[] as $dev | $ksu_list[] as $ksu | ($dev + {ksu_type: $ksu.type, ksu_hash: $ksu.hash}) ]')
+          echo "$ksu_options_normalized" > ksu_temp.json
+
+          merged_matrix=$(jq -n \
+            --slurpfile devices matrix.json \
+            --slurpfile ksu_list ksu_temp.json \
+            '[ $devices[0][] as $dev | $ksu_list[0][] as $ksu | ($dev + {ksu_type: $ksu.type, ksu_hash: $ksu.hash}) ]')
+          rm ksu_temp.json
           
           final_count=$(echo "$merged_matrix" | jq -s length)
           
@@ -401,9 +438,12 @@ jobs:
             --arg susfs_resolved "$susfs_resolved" \
             'map(.susfs_resolved_hash = $susfs_resolved)')
           
+          echo "$merged_matrix" > final_matrix_temp.json
+
           # Recalculate wrapped with updated matrix and write output
-          wrapped=$(jq -n --argjson items "$merged_matrix" '{ include: $items }')
+          wrapped=$(jq --slurp '{ include: .[] }' final_matrix_temp.json)
           echo "matrix=$(jq -c . <<< "$wrapped")" >> "$GITHUB_OUTPUT"
+          rm final_matrix_temp.json
           
           echo "::endgroup::"
 
@@ -452,6 +492,7 @@ jobs:
           
             cat << 'EOF'
           - Optimization: ${{ inputs.optimize_level }}
+          - MLGO: ${{ inputs.mlgo }}
           - Clean Build/No Ccache: ${{ inputs.clean_build && '✅ Yes' || '❌ No' }}
           - Create Debug Artifacts: ${{ inputs.debug && '✅ Yes' || '❌ No' }}
           - Sync toolchains: ${{ inputs.mirror_toolchains && '✅ Yes' || '❌ No' }}
@@ -486,7 +527,7 @@ jobs:
 
   prepare_ccache:
     name: Prepare ccache binary (download once)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Download the custom ccache binary ONCE for the whole matrix and share it as
       # an artifact. Previously every parallel matrix job curl'd the same GitHub raw
@@ -528,7 +569,7 @@ jobs:
       !cancelled() &&
       needs.set-op-model.result == 'success' &&
       (needs.mirror_toolchain.result == 'success' || needs.mirror_toolchain.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.set-op-model.outputs.matrix) }}
@@ -649,6 +690,7 @@ jobs:
           ksu_branch_or_hash: ${{ matrix.ksu_resolved_hash }}
           susfs_commit_hash_or_branch: ${{ matrix.susfs_resolved_hash }}
           optimize_level: ${{ inputs.optimize_level }}
+          mlgo: ${{ inputs.mlgo }}
           build_timestamp: ${{ inputs.build_timestamp }}
           clean: ${{ inputs.clean_build }}
           debug: ${{ inputs.debug }}
