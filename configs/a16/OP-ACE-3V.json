@@ -24,5 +24,6 @@
   "ip_set": true,
   "unicode": true,
   "ntsync": true,
+  "sdp900ma": true,
   "uname": "OP-WILD"
 }
